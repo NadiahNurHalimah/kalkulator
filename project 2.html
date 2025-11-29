@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kalkulator Scientific Modern</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background: #f4f6f9;
+      transition: background 0.3s, color 0.3s;
+    }
+    .dark-mode {
+      background: #121212;
+      color: white;
+    }
+    .container {
+      display: flex;
+      gap: 20px;
+    }
+    .calculator {
+      width: 360px;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      transition: background 0.3s;
+    }
+    .dark-mode .calculator {
+      background: #1e1e1e;
+    }
+    .display {
+      background: #222;
+      color: #0f0;
+      font-size: 2rem;
+      font-weight: bold;
+      padding: 25px 15px;
+      text-align: right;
+      overflow-x: auto;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 20px;
+    }
+    button {
+      padding: 18px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: #e0e0e0;
+      transition: transform 0.1s, background 0.2s;
+    }
+    button:hover {
+      background: #d5d5d5;
+    }
+    button:active {
+      transform: scale(0.95);
+    }
+    .operator { background: #ff9800; color: white; }
+    .function { background: #2196f3; color: white; }
+    .equal { background: #4caf50; color: white; grid-column: span 2; }
+    .clear { background: #f44336; color: white; }
+    .dark-mode-toggle {
+      margin: 15px auto;
+      display: block;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 12px;
+      background: #666;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .dark-mode-toggle:hover {
+      background: #444;
+    }
+    /* History Panel */
+    .history {
+      width: 220px;
+      height: 480px;
+      background: white;
+      border-radius: 15px;
+      padding: 15px;
+      overflow-y: auto;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      font-size: 0.9rem;
+    }
+    .dark-mode .history {
+      background: #1e1e1e;
+      color: #ddd;
+    }
+    .history h3 {
+      margin-top: 0;
+      text-align: center;
+      color: #444;
+    }
+    .dark-mode .history h3 {
+      color: #fff;
+    }
+    .history-item {
+      padding: 6px 8px;
+      border-bottom: 1px solid #ddd;
+      cursor: pointer;
+    }
+    .dark-mode .history-item {
+      border-bottom: 1px solid #333;
+    }
+    .history-item:hover {
+      background: #f0f0f0;
+    }
+    .dark-mode .history-item:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Kalkulator -->
+    <div>
+      <div class="calculator">
+        <div id="display" class="display">0</div>
+        <div class="buttons">
+          <button class="clear">C</button>
+          <button class="function">sin</button>
+          <button class="function">cos</button>
+          <button class="function">tan</button>
+          <button class="operator">/</button>
+          
+          <button class="function">ln</button>
+          <button class="function">log</button>
+          <button class="function">√</button>
+          <button class="function">^</button>
+          <button class="operator">*</button>
+          
+          <button>7</button>
+          <button>8</button>
+          <button>9</button>
+          <button>%</button>
+          <button class="operator">-</button>
+          
+          <button>4</button>
+          <button>5</button>
+          <button>6</button>
+          <button>π</button>
+          <button class="operator">+</button>
+          
+          <button>1</button>
+          <button>2</button>
+          <button>3</button>
+          <button>e</button>
+          <button class="equal">=</button>
+          
+          <button>0</button>
+          <button>.</button>
+          <button>(</button>
+          <button>)</button>
+        </div>
+      </div>
+      <button class="dark-mode-toggle">🌙 Dark Mode</button>
+    </div>
+
+    <!-- History -->
+    <div class="history">
+      <h3>Riwayat</h3>
+      <div id="history-list"></div>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const buttons = document.querySelectorAll("button");
+    const darkToggle = document.querySelector(".dark-mode-toggle");
+    const historyList = document.getElementById("history-list");
+    let input = "";
+
+    function addHistory(expression, result) {
+      const item = document.createElement("div");
+      item.classList.add("history-item");
+      item.textContent = `${expression} = ${result}`;
+      item.addEventListener("click", () => {
+        input = result;
+        display.textContent = input;
+      });
+      historyList.appendChild(item);
+      historyList.scrollTop = historyList.scrollHeight;
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const value = btn.textContent;
+
+        if (value === "C") {
+          input = "";
+          display.textContent = "0";
+        } else if (value === "=") {
+          try {
+            let expression = input
+              .replace(/π/g, Math.PI)
+              .replace(/e/g, Math.E)
+              .replace(/√/g, "Math.sqrt")
+              .replace(/sin/g, "Math.sin")
+              .replace(/cos/g, "Math.cos")
+              .replace(/tan/g, "Math.tan")
+              .replace(/log/g, "Math.log10")
+              .replace(/ln/g, "Math.log")
+              .replace(/\^/g, "**");
+            
+            let result = eval(expression);
+            addHistory(input, result);
+            input = result.toString();
+            display.textContent = input;
+          } catch {
+            display.textContent = "Error";
+            input = "";
+          }
+        } else if (value !== "🌙 Dark Mode" && value !== "☀️ Light Mode") {
+          input += value;
+          display.textContent = input;
+        }
+      });
+    });
+
+    // Toggle dark mode
+    darkToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      darkToggle.textContent = 
+        document.body.classList.contains("dark-mode") ? "☀️ Light Mode" : "🌙 Dark Mode";
+    });
+
+    // Keyboard support
+    document.addEventListener("keydown", (e) => {
+      if ((/[0-9+\-*/().]/).test(e.key)) {
+        input += e.key;
+        display.textContent = input;
+      } else if (e.key === "Enter") {
+        try {
+          let result = eval(input);
+          addHistory(input, result);
+          input = result.toString();
+          display.textContent = input;
+        } catch {
+          display.textContent = "Error";
+          input = "";
+        }
+      } else if (e.key === "Backspace") {
+        input = input.slice(0, -1);
+        display.textContent = input || "0";
+      }
+    });
+  </script>
+</body>
+</html>
